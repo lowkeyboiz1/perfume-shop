@@ -1,4 +1,4 @@
-export interface Product {
+export interface IProduct {
   id: string
   name: string
   description: string
@@ -7,13 +7,12 @@ export interface Product {
   image: string
 }
 
-export interface CartItem extends Product {
+export interface ICartItem extends IProduct {
   quantity: number
 }
 
-export interface User {
+export interface IUser {
   id: string
   email: string
   name: string
 }
-

@@ -1,14 +1,12 @@
-"use client"
+'use client'
 
-import type React from "react"
-
-import { CartProvider } from "@/context/cart-context"
-import { AuthProvider } from "@/context/auth-context"
+import type React from 'react'
+import { ThemeProvider } from '@/components/theme-provider'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-      <CartProvider>{children}</CartProvider>
-    </AuthProvider>
+    <ThemeProvider attribute='class' defaultTheme='system' enableSystem disableTransitionOnChange>
+      {children}
+    </ThemeProvider>
   )
 }

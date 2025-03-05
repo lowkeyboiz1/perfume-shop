@@ -1,41 +1,82 @@
-"use client"
+'use client'
 
-import Image from "next/image"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { useCart } from "@/context/cart-context"
-import { useToast } from "@/components/ui/use-toast"
-import type { Product } from "@/types"
+import type React from 'react'
 
-export function ProductCard({ product }: { product: Product }) {
+import { useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { Button } from '@/components/ui/button'
+import { useCart } from '@/hooks/useCart'
+import { useToast } from '@/components/ui/use-toast'
+import { Heart, ShoppingCart } from 'lucide-react'
+import type { IProduct } from '@/types'
+
+export function ProductCard({ product }: { product: IProduct }) {
   const { addToCart } = useCart()
   const { toast } = useToast()
+  const [isHovered, setIsHovered] = useState(false)
+  const [isLiked, setIsLiked] = useState(false)
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault()
     addToCart(product)
     toast({
-      title: "Added to cart",
-      description: `${product.name} has been added to your cart.`,
+      title: 'Added to cart',
+      description: `${product.name} has been added to your cart.`
+    })
+  }
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsLiked(!isLiked)
+    toast({
+      title: isLiked ? 'Removed from wishlist' : 'Added to wishlist',
+      description: `${product.name} has been ${isLiked ? 'removed from' : 'added to'} your wishlist.`
     })
   }
 
   return (
-    <div className="group relative rounded-lg border bg-background p-4">
-      <Link href={`/products/${product.id}`} className="block">
-        <div className="relative aspect-square overflow-hidden rounded-lg">
-          <Image src={product.image || "/placeholder.svg"} alt={product.name} fill className="object-cover transition-transform group-hover:scale-105" />
+    <motion.div
+      className='group relative rounded-xl bg-background'
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Link href={`/products/${product.id}`} className='block'>
+        <div className='relative aspect-square overflow-hidden rounded-xl'>
+          <Image src={product.image || '/placeholder.svg'} alt={product.name} fill className='object-cover transition-transform duration-300 group-hover:scale-105' />
+          <div className='absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/10' />
+
+          <motion.div className='absolute right-4 top-4' initial={false} animate={{ scale: isLiked ? 1.2 : 1 }} whileTap={{ scale: 0.9 }}>
+            <Button size='icon' variant='secondary' className='h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm' onClick={handleLike}>
+              <Heart className={`h-4 w-4 transition-colors ${isLiked ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`} />
+            </Button>
+          </motion.div>
+
+          <motion.div className='absolute inset-x-0 bottom-0 p-4' initial={{ opacity: 0, y: 10 }} animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 10 }}>
+            <Button className='w-full bg-background/80 text-foreground backdrop-blur-sm hover:text-white' onClick={handleAddToCart}>
+              <ShoppingCart className='mr-2 h-4 w-4' />
+              Add to Cart
+            </Button>
+          </motion.div>
         </div>
-        <div className="mt-4">
-          <h3 className="text-lg font-medium">{product.name}</h3>
-          <p className="mt-1 text-sm text-muted-foreground">{product.category}</p>
-          <p className="mt-2 text-lg font-semibold">${product.price.toFixed(2)}</p>
+
+        <div className='p-4'>
+          <motion.div layout>
+            <h3 className='font-medium'>{product.name}</h3>
+            <p className='mt-1 text-sm text-muted-foreground'>{product.category}</p>
+            <div className='mt-2 flex items-center justify-between'>
+              <p className='text-lg font-semibold'>${product.price.toFixed(2)}</p>
+              <Button onClick={handleAddToCart} className='bg-primary text-primary-foreground lg:hidden'>
+                Add to cart
+              </Button>
+            </div>
+          </motion.div>
         </div>
       </Link>
-      <div className="mt-4">
-        <Button className="w-full" onClick={handleAddToCart}>
-          Add to Cart
-        </Button>
-      </div>
-    </div>
+    </motion.div>
   )
 }
