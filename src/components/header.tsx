@@ -109,7 +109,7 @@ export function Header() {
           </motion.div>
 
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button variant='ghost' size='icon' className='relative hover:bg-primary/10' onClick={toggleCart}>
+            <Button variant='ghost' size='icon' className='relative hover:bg-primary/10' onClick={toggleCart} id='cart-button'>
               <ShoppingCart className='h-5 w-5' />
               {cartItems.length > 0 && (
                 <motion.span

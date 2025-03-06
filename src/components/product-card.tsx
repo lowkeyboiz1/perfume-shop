@@ -1,39 +1,63 @@
 'use client'
 
-import type React from 'react'
-
-import { useState } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { useCart } from '@/hooks/useCart'
-import { useToast } from '@/components/ui/use-toast'
-import { Heart, ShoppingCart } from 'lucide-react'
 import type { IProduct } from '@/types'
+import { motion } from 'framer-motion'
+import { Heart, Plus } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import type React from 'react'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import { AddToCartButton } from '@/components/add-to-cart-button'
 
 export function ProductCard({ product }: { product: IProduct }) {
   const { addToCart } = useCart()
-  const { toast } = useToast()
   const [isHovered, setIsHovered] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
+  const [isAnimating, setIsAnimating] = useState(false)
+  const [animPosition, setAnimPosition] = useState({ top: 0, left: 0 })
+  const [cartButtonPosition, setCartButtonPosition] = useState({ top: 0, left: 0 })
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
-    addToCart(product)
-    toast({
-      title: 'Added to cart',
-      description: `${product.name} has been added to your cart.`
+
+    // Get button position for animation
+    const buttonRect = e.currentTarget.getBoundingClientRect()
+
+    setAnimPosition({
+      top: buttonRect.top + buttonRect.height / 2,
+      left: buttonRect.left + buttonRect.width / 2
     })
+
+    // Start animation
+    setIsAnimating(true)
+
+    // Add to cart after animation
+    setTimeout(() => {
+      setIsAnimating(false)
+      addToCart(product)
+      toast.success('Added to cart', {
+        description: `${product.name} has been added to your cart.`
+      })
+    }, 1000)
   }
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault()
-    setIsLiked(!isLiked)
-    toast({
-      title: isLiked ? 'Removed from wishlist' : 'Added to wishlist',
-      description: `${product.name} has been ${isLiked ? 'removed from' : 'added to'} your wishlist.`
-    })
+
+    // Check if a similar toast is already active
+    const toastId = `wishlist-${product.id}`
+    const existingToast = document.querySelector(`[data-toast-id="${toastId}"]`)
+    if (!existingToast) {
+      setIsLiked(!isLiked)
+      toast.success(isLiked ? 'Removed from wishlist' : 'Added to wishlist', {
+        id: toastId,
+        description: `${product.name} has been ${isLiked ? 'removed from' : 'added to'} your wishlist.`,
+        duration: 2000
+      })
+    }
   }
 
   return (
@@ -45,7 +69,7 @@ export function ProductCard({ product }: { product: IProduct }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Link href={`/products/${product.id}`} className='block'>
+      <Link href={`/products/${product.category}/${product.id}`} className='block'>
         <div className='relative aspect-square overflow-hidden rounded-xl'>
           <Image src={product.image || '/placeholder.svg'} alt={product.name} fill className='object-cover transition-transform duration-300 group-hover:scale-105' />
           <div className='absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/10' />
@@ -57,10 +81,7 @@ export function ProductCard({ product }: { product: IProduct }) {
           </motion.div>
 
           <motion.div className='absolute inset-x-0 bottom-0 p-4' initial={{ opacity: 0, y: 10 }} animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 10 }}>
-            <Button className='w-full bg-background/80 text-foreground backdrop-blur-sm hover:text-white' onClick={handleAddToCart}>
-              <ShoppingCart className='mr-2 h-4 w-4' />
-              Add to Cart
-            </Button>
+            <AddToCartButton product={product} className='w-full bg-background/80 text-foreground backdrop-blur-sm hover:text-white' />
           </motion.div>
         </div>
 
@@ -70,9 +91,7 @@ export function ProductCard({ product }: { product: IProduct }) {
             <p className='mt-1 text-sm text-muted-foreground'>{product.category}</p>
             <div className='mt-2 flex items-center justify-between'>
               <p className='text-lg font-semibold'>${product.price.toFixed(2)}</p>
-              <Button onClick={handleAddToCart} className='bg-primary text-primary-foreground lg:hidden'>
-                Add to cart
-              </Button>
+              <AddToCartButton product={product} className='bg-primary text-primary-foreground lg:hidden' />
             </div>
           </motion.div>
         </div>

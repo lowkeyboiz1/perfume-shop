@@ -64,6 +64,7 @@ const EnhancedButton = React.forwardRef<HTMLButtonElement, ButtonProps>(({ class
   }
 
   return (
+    // @ts-ignore
     <motion.button ref={ref} className={cn(buttonVariants({ variant, size, className }))} {...props} onClick={handleClick} whileTap={{ scale: 0.98 }} disabled={isLoading || props.disabled}>
       {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
       {children}
