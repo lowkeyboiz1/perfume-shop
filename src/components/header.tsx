@@ -4,6 +4,7 @@ import CartDrawer from '@/components/cart-drawer'
 import ThemeToggle from '@/components/theme-toggle'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -58,6 +59,14 @@ export function Header() {
     { name: 'Contact', href: '/contact' }
   ]
 
+  // Sample search results for demonstration
+  const searchResults = [
+    { name: 'Teddy Bear Classic', category: 'Teddy Bears', href: '/products/teddy-bears/classic' },
+    { name: 'Rose Perfume', category: 'Perfumes', href: '/products/perfumes/rose' },
+    { name: 'Lavender Scent', category: 'Perfumes', href: '/products/perfumes/lavender' },
+    { name: 'Panda Bear', category: 'Teddy Bears', href: '/products/teddy-bears/panda' }
+  ]
+
   // Handlers
   const toggleSearch = useCallback(() => setIsSearchOpen((prev) => !prev), [])
   const toggleCart = useCallback(() => setIsCartOpen((prev) => !prev), [])
@@ -87,22 +96,8 @@ export function Header() {
 
         {/* Actions */}
         <div className='flex items-center gap-3'>
-          <AnimatePresence mode='wait'>
-            {isSearchOpen && (
-              <motion.div
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: '200px', opacity: 1 }}
-                exit={{ width: 0, opacity: 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className='hidden md:block'
-              >
-                <Input placeholder='Search...' className='w-full' autoFocus />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button variant='ghost' size='icon' className='hidden hover:bg-primary/10 md:flex' onClick={toggleSearch}>
+            <Button variant='ghost' size='icon' className='hover:bg-primary/10' onClick={toggleSearch}>
               <Search className='h-5 w-5' />
               <span className='sr-only'>Search</span>
             </Button>
@@ -207,7 +202,7 @@ export function Header() {
                 </div>
                 <div className='relative'>
                   <Search className='absolute left-3 top-3 h-4 w-4 text-muted-foreground' />
-                  <Input placeholder='Search...' className='pl-9' />
+                  <Input placeholder='Search...' className='pl-9' onClick={toggleSearch} />
                 </div>
                 <nav className='flex flex-col gap-4'>
                   {navLinks.map((link) => (
@@ -266,6 +261,32 @@ export function Header() {
         </div>
       </div>
       <CartDrawer open={isCartOpen} onClose={closeCart} />
+
+      {/* Search Dialog */}
+      <CommandDialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+        <Command className='rounded-lg border shadow-md'>
+          <CommandInput placeholder='Search products...' />
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup heading='Products'>
+              {searchResults.map((item) => (
+                <CommandItem
+                  key={item.href}
+                  onSelect={() => {
+                    window.location.href = item.href
+                    setIsSearchOpen(false)
+                  }}
+                >
+                  <div className='flex flex-col'>
+                    <span>{item.name}</span>
+                    <span className='text-xs text-muted-foreground'>{item.category}</span>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </CommandDialog>
     </motion.header>
   )
 }
