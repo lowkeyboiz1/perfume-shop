@@ -1,10 +1,11 @@
 import { MongoClient, ServerApiVersion } from 'mongodb'
+import { ENV } from './env'
 
-if (!process.env.NEXT_PUBLIC_MONGODB_URI) {
+if (!ENV.NEXT_PUBLIC_MONGODB_URI) {
   throw new Error('Please add your MongoDB URI to .env.local')
 }
 
-const uri = process.env.NEXT_PUBLIC_MONGODB_URI
+const uri = ENV.NEXT_PUBLIC_MONGODB_URI
 const options = {
   serverApi: {
     version: ServerApiVersion.v1,
